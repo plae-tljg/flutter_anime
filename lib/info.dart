@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
+import '../../models/anime.dart';
+import 'dart:convert';
 
 class InfoPage extends StatefulWidget {
   @override
@@ -19,27 +21,37 @@ class _InfoPageState extends State<InfoPage> {
     _fetchNames();
   }
 
-  Future<void> _fetchNames() async {
+  // Future<void> _fetchNames() async {
+  Future<List<Anime>> _fetchNames() async {    
     final response = await http.get(Uri.parse('https://anime1.me'));
 
     if (response.statusCode == 200) {
       final document = parser.parse(response.body);
 
+      final animeList = document.querySelectorAll('ul')[1].querySelectorAll('li');
+
+      final animes = animeList.map((element) {
+      final animeName = element.querySelector('a')?.text.trim();
+      final animeUrl = element.querySelector('a')?.attributes['href'];
+      return Anime(name: animeName ?? '', url: animeUrl ?? '');
+    }).toList();
+
+      return animes;  
       // Save the fetched HTML to display it
-      setState(() {
-        fetchedHtml = response.body;
-      });
+      // setState(() {
+      //   fetchedHtml = response.body;
+      // });
 
       // Use the correct selector for the elements you want to extract
-      final nameElements = document.querySelectorAll('main section ul li');
+      // final nameElements = document.querySelectorAll('main section ul li');
 
-      // Print the extracted elements to debug
-      nameElements.forEach((element) => print(element.text));
+      // // Print the extracted elements to debug
+      // nameElements.forEach((element) => print(element.text));
 
-      setState(() {
-        names = nameElements.map((element) => element.text.trim()).toList();
-        isLoading = false;
-      });
+      // setState(() {
+      //   names = nameElements.map((element) => element.text.trim()).toList();
+      //   isLoading = false;
+      // });
     } else {
       throw Exception('Failed to load webpage');
     }
