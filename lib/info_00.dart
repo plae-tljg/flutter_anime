@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as parser;
-import '../../models/anime.dart';
-import '../../services/anime_service.dart'; // Import your service
+import 'package:html/parser.dart' show parse;
+import 'package:webview_flutter/webview_flutter.dart';
+import '/models/anime.dart';
+import '/services/anime_service.dart'; // Import your service
+// ... (your imports for anime data models and potentially AnimeService)
 
 class InfoPage extends StatefulWidget {
   @override
@@ -21,25 +23,25 @@ class _InfoPageState extends State<InfoPage> {
 
   Future<void> _fetchAnimeData() async {
     try {
-      final fetchedAnimes = await AnimeService.fetchAnimeData();
+      final fetchedAnimes = await AnimeService.fetchAnimeData(); // Assuming you have an AnimeService
       setState(() {
         animes = fetchedAnimes;
-        isLoading = false; // Set loading to false after data is fetched
+        isLoading = false;
       });
     } catch (e) {
       print('Error fetching anime data: $e');
       setState(() {
-        isLoading = false; // Set loading to false even if there's an error
+        isLoading = false;
       });
     }
   }
 
+  // ... (your existing code for fetching and parsing anime data)
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Names List'),
-      ),
+      appBar: AppBar(title: Text('Anime List')),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -48,10 +50,27 @@ class _InfoPageState extends State<InfoPage> {
                 final anime = animes[index];
                 return ListTile(
                   title: Text(anime.name),
-                  subtitle: Text(anime.url),
+                  onTap: () {
+                    _launchAnimePage(context, anime.url);
+                  },
                 );
               },
             ),
+    );
+  }
+
+  void _launchAnimePage(BuildContext context, String animeUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text('Anime Player')),
+          body: WebView(
+            initialUrl: animeUrl, 
+            javascriptMode: JavascriptMode.unrestricted, 
+          ),
+        ),
+      ),
     );
   }
 }
