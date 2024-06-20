@@ -1,0 +1,356 @@
+// DOM Tree
+digraph {
+	root [label=HTML]
+	html [label=html]
+	root -> html
+	head [label=head]
+	html -> head
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	link [label=link]
+	head -> link
+	script [label=script]
+	head -> script
+	script [label=script]
+	head -> script
+	script [label=script]
+	head -> script
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	title [label=title]
+	head -> title
+	meta [label=meta]
+	head -> meta
+	style [label=style]
+	head -> style
+	style [label=style]
+	head -> style
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	script [label=script]
+	head -> script
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	link [label=link]
+	head -> link
+	script [label=script]
+	head -> script
+	body [label=body]
+	html -> body
+	div [label=div]
+	body -> div
+	a [label=a]
+	div -> a
+	div [label=div]
+	div -> div
+	span [label=span]
+	div -> span
+	span [label=span]
+	div -> span
+	header [label=header]
+	div -> header
+	div [label=div]
+	header -> div
+	div [label=div]
+	div -> div
+	div [label=div]
+	div -> div
+	h1 [label=h1]
+	div -> h1
+	a [label=a]
+	h1 -> a
+	span [label=span]
+	a -> span
+	nav [label=nav]
+	div -> nav
+	button [label=button]
+	nav -> button
+	div [label=div]
+	nav -> div
+	ul [label=ul]
+	div -> ul
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	div [label=div]
+	div -> div
+	div [label=div]
+	div -> div
+	main [label=main]
+	div -> main
+	div [label=div]
+	main -> div
+	article [label=article]
+	main -> article
+	div [label=div]
+	article -> div
+	a [label=a]
+	div -> a
+	header [label=header]
+	article -> header
+	h2 [label=h2]
+	header -> h2
+	div [label=div]
+	header -> div
+	span [label=span]
+	div -> span
+	a [label=a]
+	span -> a
+	time [label=time]
+	a -> time
+	div [label=div]
+	article -> div
+	p [label=p]
+	div -> p
+	table [label=table]
+	div -> table
+	thead [label=thead]
+	table -> thead
+	tr [label=tr]
+	thead -> tr
+	th [label=th]
+	tr -> th
+	th [label=th]
+	tr -> th
+	th [label=th]
+	tr -> th
+	th [label=th]
+	tr -> th
+	th [label=th]
+	tr -> th
+	tbody [label=tbody]
+	table -> tbody
+	div [label=div]
+	main -> div
+	aside [label=aside]
+	div -> aside
+	section [label=section]
+	aside -> section
+	form [label=form]
+	section -> form
+	label [label=label]
+	form -> label
+	span [label=span]
+	label -> span
+	input [label=input]
+	label -> input
+	input [label=input]
+	form -> input
+	section [label=section]
+	aside -> section
+	div [label=div]
+	section -> div
+	div [label=div]
+	div -> div
+	section [label=section]
+	aside -> section
+	h3 [label=h3]
+	section -> h3
+	ul [label=ul]
+	h3 -> ul
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	li [label=li]
+	ul -> li
+	a [label=a]
+	li -> a
+	section [label=section]
+	aside -> section
+	div [label=div]
+	section -> div
+	div [label=div]
+	div -> div
+	div [label=div]
+	div -> div
+	a [label=a]
+	div -> a
+	img [label=img]
+	a -> img
+	p [label=p]
+	a -> p
+	footer [label=footer]
+	div -> footer
+	div [label=div]
+	footer -> div
+	a [label=a]
+	div -> a
+	span [label=span]
+	a -> span
+	div [label=div]
+	footer -> div
+	div [label=div]
+	footer -> div
+	button [label=button]
+	div -> button
+	svg [label=svg]
+	button -> svg
+	path [label=path]
+	svg -> path
+	span [label=span]
+	button -> span
+	button [label=button]
+	div -> button
+	svg [label=svg]
+	button -> svg
+	path [label=path]
+	svg -> path
+	span [label=span]
+	button -> span
+	button [label=button]
+	div -> button
+	svg [label=svg]
+	button -> svg
+	path [label=path]
+	svg -> path
+	span [label=span]
+	button -> span
+	div [label=div]
+	footer -> div
+	br [label=br]
+	div -> br
+	span [label=span]
+	div -> span
+	a [label=a]
+	span -> a
+	span [label=span]
+	span -> span
+	a [label=a]
+	span -> a
+	br [label=br]
+	span -> br
+	a [label=a]
+	span -> a
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
+}
