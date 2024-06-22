@@ -1,3 +1,6 @@
+Flutter project to display anime update list, videos and so on as long as I think of
+_________________________________________________________________________________________
+
 # flutter_application_1
 
 A new Flutter project.
