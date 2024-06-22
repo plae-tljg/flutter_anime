@@ -3,6 +3,7 @@
 # Set the virtual environment path (replace with your actual path)
 VENV_PATH="$HOME/Documents/ai_venv"
 
+
 # Check if the virtual environment exists
 if [ ! -d "$VENV_PATH" ]; then
   echo "Error: Virtual environment not found at '$VENV_PATH'"

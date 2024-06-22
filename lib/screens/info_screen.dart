@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
-import 'package:webview_flutter/webview_flutter.dart';
-import '/models/anime.dart';
-import '/services/anime_service.dart'; // Import your service
-// ... (your imports for anime data models and potentially AnimeService)
+import '../models/anime.dart';
+import '../services/anime_service.dart';
+import '../utils/navigation_helper.dart';
 
-class InfoPage extends StatefulWidget {
+class InfoScreen extends StatefulWidget {
   @override
-  _InfoPageState createState() => _InfoPageState();
+  _InfoScreenState createState() => _InfoScreenState();
 }
 
-class _InfoPageState extends State<InfoPage> {
+class _InfoScreenState extends State<InfoScreen> {
   List<Anime> animes = [];
   bool isLoading = true;
 
@@ -51,7 +48,7 @@ class _InfoPageState extends State<InfoPage> {
                 return ListTile(
                   title: Text(anime.name),
                   onTap: () {
-                    _launchAnimePage(context, anime.url);
+                    launchAnimePage(context, anime.url);
                   },
                 );
               },
@@ -59,18 +56,4 @@ class _InfoPageState extends State<InfoPage> {
     );
   }
 
-  void _launchAnimePage(BuildContext context, String animeUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: Text('Anime Player')),
-          body: WebView(
-            initialUrl: animeUrl, 
-            javascriptMode: JavascriptMode.unrestricted, 
-          ),
-        ),
-      ),
-    );
-  }
 }
