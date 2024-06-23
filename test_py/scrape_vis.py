@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from graphviz import Digraph
 
-url = 'https://anime1.me/'  # Replace with the actual URL you want to scrape
+# url = 'https://anime1.me/'  # Replace with the actual URL you want to scrape
+url = 'https://anime1.me/23287'
 response = requests.get(url)
 response.raise_for_status()  # Check for HTTP errors
 
@@ -22,7 +23,8 @@ def create_graph(soup, filename="dom_tree.gv"):
     traverse(soup, 'root')
     dot.render(filename, view=True)
 
-create_graph(soup)
+filename = "dom_tree_" + url + ".gv"
+create_graph(soup, filename)
 
 # # This part depends heavily on the website's structure.
 # # Inspect the HTML source (right-click on the page, "View Page Source")
