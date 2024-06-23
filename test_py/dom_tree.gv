@@ -61,10 +61,44 @@ digraph {
 	head -> meta
 	meta [label=meta]
 	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
+	meta [label=meta]
+	head -> meta
 	title [label=title]
 	head -> title
 	meta [label=meta]
 	head -> meta
+	style [label=style]
+	head -> style
 	style [label=style]
 	head -> style
 	style [label=style]
@@ -181,26 +215,34 @@ digraph {
 	a -> time
 	div [label=div]
 	article -> div
+	div [label=div]
+	div -> div
+	video [label=video]
+	div -> video
 	p [label=p]
 	div -> p
-	table [label=table]
-	div -> table
-	thead [label=thead]
-	table -> thead
-	tr [label=tr]
-	thead -> tr
-	th [label=th]
-	tr -> th
-	th [label=th]
-	tr -> th
-	th [label=th]
-	tr -> th
-	th [label=th]
-	tr -> th
-	th [label=th]
-	tr -> th
-	tbody [label=tbody]
-	table -> tbody
+	a [label=a]
+	p -> a
+	br [label=br]
+	p -> br
+	a [label=a]
+	p -> a
+	footer [label=footer]
+	article -> footer
+	span [label=span]
+	footer -> span
+	a [label=a]
+	span -> a
+	div [label=div]
+	main -> div
+	div [label=div]
+	div -> div
+	p [label=p]
+	div -> p
+	p [label=p]
+	div -> p
+	button [label=button]
+	div -> button
 	div [label=div]
 	main -> div
 	aside [label=aside]
@@ -335,6 +377,10 @@ digraph {
 	span -> br
 	a [label=a]
 	span -> a
+	script [label=script]
+	body -> script
+	script [label=script]
+	body -> script
 	script [label=script]
 	body -> script
 	script [label=script]
