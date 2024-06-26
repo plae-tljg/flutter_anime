@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'info_screen.dart';
+import 'debug_log.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -32,6 +33,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.error),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ErrorLogPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
