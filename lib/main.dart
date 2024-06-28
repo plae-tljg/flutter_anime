@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'screens/debug_log.dart'; // Make sure to import your error log page
+// Make sure to import your error log page
 import 'models/error.dart'; // Make sure to import your error logger
 
 void main() {

@@ -1,46 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/error.dart';
-
 
 class ErrorLogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final errorLogs = ErrorLogger.instance.errorLogs;
+    final customLogs = ErrorLogger.instance.customLogs;
+    final flutterErrorLogs = ErrorLogger.instance.errorLogs;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Error Logs'),
       ),
-      body: ListView.builder(
-        itemCount: errorLogs.length,
-        itemBuilder: (context, index) {
-          final error = errorLogs[index];
-          return ListTile(
-            title: Text('Error ${index + 1}'),
-            subtitle: Text(error.exceptionAsString()),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Error Details'),
-                    content: SingleChildScrollView(
-                      child: Text(error.toString()),
+      body: customLogs.isEmpty && flutterErrorLogs.isEmpty
+          ? Center(child: Text('No error logs available.'))
+          : ListView(
+              children: [
+                if (customLogs.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Custom Logs',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('Close'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+                  ),
+                  ...customLogs.map((log) => ListTile(
+                        title: Text(log),
+                      )),
+                ],
+                if (flutterErrorLogs.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Flutter Error Logs',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  ...flutterErrorLogs.map((log) => ListTile(
+                        title: Text(log.exceptionAsString()),
+                        subtitle: Text(log.stack.toString()),
+                      )),
+                ],
+              ],
+            ),
     );
   }
 }
