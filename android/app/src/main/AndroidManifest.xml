@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="flutter_application_1"
         android:name="${applicationName}"
@@ -42,7 +43,4 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
-</manifest>
-<manifest xmlns:android="...">
-  <uses-permission android:name="android.permission.INTERNET"/> <!-- Add this -->
 </manifest>
