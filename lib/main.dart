@@ -4,9 +4,9 @@ import 'screens/home_screen.dart';
 import 'models/error.dart'; // Make sure to import your error logger
 
 void main() {
-    FlutterError.onError = (FlutterErrorDetails details) {
-     FlutterError.dumpErrorToConsole(details);
-     ErrorLogger.instance.logFlutterError(details);
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+    ErrorLogger.instance.logFlutterError(details);
   };
   runApp(const MyApp());
 }

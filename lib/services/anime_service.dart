@@ -13,7 +13,7 @@ class AnimeService {
     try {
       final response = await http.get(url);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200) { 
         logger.d(response.body);
 
         final document = parse(response.body);
