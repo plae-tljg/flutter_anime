@@ -3,7 +3,6 @@ import 'package:webview_flutter/webview_flutter.dart' as webview_flutter;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart' as inappwebview;
 import 'dart:io';
 
 class AnimeWebViewScreen extends StatefulWidget {
@@ -18,7 +17,7 @@ class AnimeWebViewScreen extends StatefulWidget {
 class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
   late webview_flutter.WebViewController _controller;
   String urlFromJs = '';
-
+  String css_selectorr = "initial_value";
   @override
   void initState() {
     super.initState();
@@ -29,10 +28,12 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
   }
 
   void _injectJavaScript(String css_selector) {
+    print("injectjavascript, ${css_selector}");
     _controller.runJavascript('''
-      var srcElement = document.querySelector('${css_selector}_html5_api');
+      let srcElement = document.querySelector(`${css_selector}_html5_api`);
+      let srcUrl = '';
       if (srcElement) {
-        var srcUrl = srcElement.src;
+        srcUrl = srcElement.src;
         FlutterChannel.postMessage(srcUrl);
       }
     ''');
@@ -69,7 +70,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
   }
 
   Future<String> _extractCssSelector() async {
-      String cssSelector = await _controller!.runJavascriptReturningResult(
+      String cssSelector = await _controller.runJavascriptReturningResult(
 """
 (function() {
   // Example: Extracts CSS selector of the first <h1> element and its first child
@@ -77,7 +78,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     if (!element) return 'Element not found';
     var path = [];
     while (element.nodeType === Node.ELEMENT_NODE) {
-      var selector = element.nodeName.toLowerCase();
+      var selector = '';
       if (element.id) {
         selector += '#' + element.id;
         path.unshift(selector);
@@ -104,7 +105,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
 })();
 """
     );
-    print('CSS Selector: $cssSelector');
+    print('CSS Selector: ${cssSelector}');
   return cssSelector;
 }
 
@@ -140,6 +141,17 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
             webview_flutter.WebView(
               initialUrl: widget.animeUrl,
               javascriptMode: webview_flutter.JavascriptMode.unrestricted,
+              javascriptChannels: <webview_flutter.JavascriptChannel>{
+                webview_flutter.JavascriptChannel(
+                  name: 'FlutterChannel',
+                  onMessageReceived: (webview_flutter.JavascriptMessage message) {
+                    print("debug point at flutter channel, "+message.message);
+                    setState(() {
+                      urlFromJs = message.message;
+                    });
+                  },
+                ),
+              },
               onWebViewCreated: (webview_flutter.WebViewController webViewController) {
                 _controller = webViewController;
               },
@@ -160,21 +172,11 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
               onPageFinished: (String url) async {
                 _includeOnlyElement();
                 String css_selector = await _extractCssSelector();
+                css_selector = css_selector.replaceAll('"', '');
                 print("debug point 1: "+css_selector);
-                print("debug point 2: "+urlFromJs);
-                _injectJavaScript(css_selector);
-                _redirectToURL(urlFromJs);
-              },
-              javascriptChannels: <webview_flutter.JavascriptChannel>{
-                webview_flutter.JavascriptChannel(
-                  name: 'FlutterChannel',
-                  onMessageReceived: (webview_flutter.JavascriptMessage message) {
-                    print("debug point at flutter channel, "+message.message);
-                    setState(() {
-                      urlFromJs = message.message;
-                    });
-                  },
-                ),
+                setState(() {
+                  css_selectorr = css_selector;
+                });
               },
             ),
             Positioned(
@@ -184,6 +186,9 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
               onPressed: () {
               DateTime now = DateTime.now();
               print('1');
+              _injectJavaScript(css_selectorr);
+              print("debug point 2: "+urlFromJs);
+              _redirectToURL(urlFromJs);
               print(urlFromJs);
               _downloadFile(urlFromJs, '$now.mp4');
               },
