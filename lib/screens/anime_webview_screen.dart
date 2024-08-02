@@ -28,9 +28,9 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     }
   }
 
-  void _injectJavaScript() {
+  void _injectJavaScript(String css_selector) {
     _controller.runJavascript('''
-      var srcElement = document.querySelector('#vjs-dtcz3_html5_api');
+      var srcElement = document.querySelector('${css_selector}_html5_api');
       if (srcElement) {
         var srcUrl = srcElement.src;
         FlutterChannel.postMessage(srcUrl);
@@ -41,32 +41,72 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
   void _includeOnlyElement() {
     _controller.runJavascript(
       """
-// document.body.style.display = 'none';
+  // document.body.style.display = 'none';
 
- // Select the element you want to retain
-const targetElement = document.querySelector('.vjscontainer');
+  // Select the element you want to retain
+  const targetElement = document.querySelector('.vjscontainer');
 
-if (targetElement) {
-    // Remove all siblings and other elements-
-    const allElements = document.body.children;
-    for (let i = allElements.length - 1; i >= 0; i--) {
-        const element = allElements[i];
-        if (element !== targetElement) {
-            element.remove();
-        }
-    }
-    
-    // Move the target element to the body directly
-    document.body.appendChild(targetElement);
-} else {
-    console.log("Element with class '.vjs-poster' not found.");
-}
+  if (targetElement) {
+      // Remove all siblings and other elements-
+      const allElements = document.body.children;
+      for (let i = allElements.length - 1; i >= 0; i--) {
+          const element = allElements[i];
+          if (element !== targetElement) {
+              element.remove();
+          }
+      }
+      
+      // Move the target element to the body directly
+      document.body.appendChild(targetElement);
+  } else {
+      console.log("Element with class '.vjs-poster' not found.");
+  }
 
-document.body.style.display = 'block';
-// document.body.style.height = '300%'
-      """
+  document.body.style.display = 'block';
+  // document.body.style.height = '300%'
+        """
     );
   }
+
+  Future<String> _extractCssSelector() async {
+      String cssSelector = await _controller!.runJavascriptReturningResult(
+"""
+(function() {
+  // Example: Extracts CSS selector of the first <h1> element and its first child
+  function getCssSelector(element) {
+    if (!element) return 'Element not found';
+    var path = [];
+    while (element.nodeType === Node.ELEMENT_NODE) {
+      var selector = element.nodeName.toLowerCase();
+      if (element.id) {
+        selector += '#' + element.id;
+        path.unshift(selector);
+        break;
+      } else {
+        var sib = element, nth = 1;
+        while (sib = sib.previousElementSibling) {
+          if (sib.nodeName.toLowerCase() == selector)
+            nth++;
+        }
+        if (nth != 1)
+          selector += ":nth-of-type(" + nth + ")";
+      }
+      path.unshift(selector);
+      element = element.parentNode;
+    }
+    return path.join(" > ");
+  }
+
+  var parentElement = document.querySelector('.vjscontainer');
+  var childElement = parentElement ? parentElement.children[0] : null;
+
+  return getCssSelector(childElement);
+})();
+"""
+    );
+    print('CSS Selector: $cssSelector');
+  return cssSelector;
+}
 
   Future<void> _downloadFile(String url, String fileName) async {
   try {
@@ -117,16 +157,19 @@ document.body.style.display = 'block';
                   document.documentElement.style.display = 'none';
                 ''');
               },
-              onPageFinished: (String url) {
+              onPageFinished: (String url) async {
                 _includeOnlyElement();
-                _injectJavaScript();
+                String css_selector = await _extractCssSelector();
+                print("debug point 1: "+css_selector);
+                print("debug point 2: "+urlFromJs);
+                _injectJavaScript(css_selector);
                 _redirectToURL(urlFromJs);
               },
               javascriptChannels: <webview_flutter.JavascriptChannel>{
                 webview_flutter.JavascriptChannel(
                   name: 'FlutterChannel',
                   onMessageReceived: (webview_flutter.JavascriptMessage message) {
-                    print(message.message);
+                    print("debug point at flutter channel, "+message.message);
                     setState(() {
                       urlFromJs = message.message;
                     });
