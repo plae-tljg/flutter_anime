@@ -1,19 +1,13 @@
-Flutter project to display anime update list, videos and so on as long as I think of
-_________________________________________________________________________________________
+# flutter_anime
 
-# flutter_application_1
+Flutter project to display anime update list, videos and so on as long as I think of, based on another anime site which allow scrapping
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# current functions:
+0. flutter clicking template
+1. view most recent anime list (based on a site)
+2. view anime there
+3. info page to handle error logging on frontend
+4. anime downloading (working)
+5. changing source (working)
+6. minigame (working)
+7. any feature to add
