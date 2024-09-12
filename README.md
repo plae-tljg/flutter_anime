@@ -1,33 +1,25 @@
 # 动画下载器
 用flutter做的app，能展示新更新动画列表，看并下载该网站的动画。
-动画源目前只有一个（请自行看<a href='lib/screens/anime_webview_screen.dart'>file</a>）
 
-# flutter_anime
-
-Flutter project to display anime update list, videos and so on as long as I think of, based on another anime site which allow scrapping
+动画源目前只有一个（请自行看<a href='lib/services/anime_service.dart'>anime_service.dart</a>）,日后会更新更多片源。
 
 
-# current functions:
+# 目前的功能
 
-0. flutter clicking template
-1. view most recent anime list (based on a site)
-2. view anime there
-3. info page to handle error logging on frontend
-4. anime downloading
-5. downloaded anime viewing
-6. changing source (working, 0%)
-7. chatbot (working, 0%)
-8. minigame (working, 0%)
-9. any feature to add
-
-
-# working idea
-
-1. similar to PWA
-2. handle webpage through user's interaction so as to avoid like selenium
+0. flutter自带的记数器  （😆😆😆对懒得改）
+1. 看最近更新的动画列表
+2. 看动画
+3. 一个除错列表
+4. 下载动画  （用了js注入，先按播放再按下载（下载至少按两次））
+5. 看下载了的动画  （🤔为什么不能在下载文件夹下载呢）
+6. 换源  （在做别催😡）
+7. 对话机器人  （不难做🙅‍♂️但我家网络不好，做不了服务器）
+8. 小游戏  （做个屁😾）
+9. 数据展示，分析  （🤔）
+10. 做个指南针
+11. 做个末日求生指南
 
 
-# directory
+# 主要代码部分
 
-1. lib:  for flutter scripts
-2. test_py:  python testing scripts for scraping, visualization
+跟着MVC结构做的，看<a href='lib'>lib</a>里面
