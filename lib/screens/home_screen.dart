@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'info_screen.dart';
 import 'debug_log.dart';
+import 'video_screen.dart';
+import 'video_info.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -24,6 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => InfoScreen()),
+    );
+  }
+
+  void _navigateToVideoPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => VideoGalleryScreen()),
     );
   }
 
@@ -59,6 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               onPressed: _navigateToInfoPage,
               child: Text('Go to Info Page'),
+            ),
+            ElevatedButton(
+              onPressed: _navigateToVideoPage,
+              child: Text('Go to Video Page'),
             ),
           ],
         ),

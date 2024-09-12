@@ -6,8 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
+import '../scripts/anime_webview_fn.dart';
 
-class AnimeWebViewScreen extends StatefulWidget {
+
+class AnimeWebViewScreen extends StatefulWidget with jsMethods {
 
   final String animeUrl;
   const AnimeWebViewScreen({super.key, required this.animeUrl});
@@ -16,7 +18,7 @@ class AnimeWebViewScreen extends StatefulWidget {
   _AnimeWebViewScreen createState() => _AnimeWebViewScreen();
 }
 
-class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
+class _AnimeWebViewScreen extends State<AnimeWebViewScreen> with jsMethods {
   final CookieManager = WebviewCookieManager();
 
   late webview_flutter.WebViewController _controller;
@@ -32,87 +34,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     CookieManager.clearCookies();
   }
 
-  void _injectJavaScript(String css_selector) {
-    print("injectjavascript, ${css_selector}");
-    _controller.runJavascript('''
-      let srcElement = document.querySelector(`${css_selector}_html5_api`);
-      let srcUrl = '';
-      if (srcElement) {
-        srcUrl = srcElement.src;
-        FlutterChannel.postMessage(srcUrl);
-      }
-    ''');
-  }
 
-  void _includeOnlyElement() {
-    _controller.runJavascript(
-      """
-  // document.body.style.display = 'none';
-
-  // Select the element you want to retain
-  const targetElement = document.querySelector('.vjscontainer');
-
-  if (targetElement) {
-      // Remove all siblings and other elements-
-      const allElements = document.body.children;
-      for (let i = allElements.length - 1; i >= 0; i--) {
-          const element = allElements[i];
-          if (element !== targetElement) {
-              element.remove();
-          }
-      }
-      
-      // Move the target element to the body directly
-      document.body.appendChild(targetElement);
-  } else {
-      console.log("Element with class '.vjs-poster' not found.");
-  }
-
-  document.body.style.display = 'block';
-  // document.body.style.height = '300%'
-        """
-    );
-  }
-
-  Future<String> _extractCssSelector() async {
-      String cssSelector = await _controller.runJavascriptReturningResult(
-"""
-(function() {
-  // Example: Extracts CSS selector of the first <h1> element and its first child
-  function getCssSelector(element) {
-    if (!element) return 'Element not found';
-    var path = [];
-    while (element.nodeType === Node.ELEMENT_NODE) {
-      var selector = '';
-      if (element.id) {
-        selector += '#' + element.id;
-        path.unshift(selector);
-        break;
-      } else {
-        var sib = element, nth = 1;
-        while (sib = sib.previousElementSibling) {
-          if (sib.nodeName.toLowerCase() == selector)
-            nth++;
-        }
-        if (nth != 1)
-          selector += ":nth-of-type(" + nth + ")";
-      }
-      path.unshift(selector);
-      element = element.parentNode;
-    }
-    return path.join(" > ");
-  }
-
-  var parentElement = document.querySelector('.vjscontainer');
-  var childElement = parentElement ? parentElement.children[0] : null;
-
-  return getCssSelector(childElement);
-})();
-"""
-    );
-    print('CSS Selector: ${cssSelector}');
-  return cssSelector;
-}
 
   Future<void> _downloadFile(String url, String fileName) async {
   try {
@@ -120,7 +42,9 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     if (await Permission.storage.request().isGranted) {
       // Get the directory for saving the file
       final directory = await getExternalStorageDirectory();
+      // final downloadsDirectory = await Directory('/storage/emulated/0/Download').create(recursive: true);
       final filePath = '${directory?.path}/$fileName';
+      // final filePath = '${downloadsDirectory?.path}/$fileName';
       final file = File(filePath);
       final cookies = await CookieManager.getCookies(urlFromJs);
       print('_downloadfile'+url);
@@ -143,8 +67,6 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     print('Error downloading file: $e');
   }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -184,8 +106,8 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
                 ''');
               },
               onPageFinished: (String url) async {
-                _includeOnlyElement();
-                String css_selector = await _extractCssSelector();
+                includeOnlyElement( _controller );
+                String css_selector = await extractCssSelector( _controller );
                 css_selector = css_selector.replaceAll('"', '');
                 print("debug point 1: "+css_selector);
                 setState(() {
@@ -200,9 +122,9 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
               onPressed: () {
               DateTime now = DateTime.now();
               print('1');
-              _injectJavaScript(css_selectorr);
+              injectJavaScript(css_selectorr, _controller);
               print("debug point 2: "+urlFromJs);
-              _redirectToURL(urlFromJs);
+              redirectToURL(urlFromJs, _controller);
               print(urlFromJs);
               _downloadFile(urlFromJs, '$now.mp4');
               },
@@ -214,7 +136,5 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     );
   }
 
-  void _redirectToURL(String url) {
-    _controller.loadUrl(url);
-  }
+
 }
