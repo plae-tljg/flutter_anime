@@ -1,3 +1,7 @@
+# 动画下载器
+用flutter做的app，能展示新更新动画列表，看并下载该网站的动画。
+动画源目前只有一个（请自行看<a href='lib/screens/anime_webview_screen.dart'></a>）
+
 # flutter_anime
 
 Flutter project to display anime update list, videos and so on as long as I think of, based on another anime site which allow scrapping
