@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:webview_flutter/webview_flutter.dart' as webview_flutter;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
+import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 
 class AnimeWebViewScreen extends StatefulWidget {
 
@@ -15,6 +17,8 @@ class AnimeWebViewScreen extends StatefulWidget {
 }
 
 class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
+  final CookieManager = WebviewCookieManager();
+
   late webview_flutter.WebViewController _controller;
   String urlFromJs = '';
   String css_selectorr = "initial_value";
@@ -25,6 +29,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     if (Platform.isAndroid) {
       webview_flutter.WebView.platform = webview_flutter.SurfaceAndroidWebView();
     }
+    CookieManager.clearCookies();
   }
 
   void _injectJavaScript(String css_selector) {
@@ -117,9 +122,17 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
       final directory = await getExternalStorageDirectory();
       final filePath = '${directory?.path}/$fileName';
       final file = File(filePath);
+      final cookies = await CookieManager.getCookies(urlFromJs);
+      print('_downloadfile'+url);
+      for (var item in cookies) {
+              print(item);
+            }
       print('point a');
       // Download the file
-      final response = await http.get(Uri.parse(url));
+      final headers = {
+        'Cookie': cookies.map((cookie) => '${cookie.name}=${cookie.value}').join('; '),
+      };
+      final response = await http.get(Uri.parse(url), headers: headers);
       await file.writeAsBytes(response.bodyBytes);
 
       print('Downloaded file saved to $filePath');
@@ -130,6 +143,7 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     print('Error downloading file: $e');
   }
   }
+
 
 
   @override
@@ -204,4 +218,3 @@ class _AnimeWebViewScreen extends State<AnimeWebViewScreen> {
     _controller.loadUrl(url);
   }
 }
-
