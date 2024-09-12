@@ -3,6 +3,7 @@
 
 动画源目前只有一个（请自行看<a href='lib/services/anime_service.dart'>anime_service.dart</a>）,日后会更新更多片源。
 
+<br>
 
 # 目前的功能
 
@@ -19,7 +20,18 @@
 10. 做个指南针
 11. 做个末日求生指南
 
+<br>
 
 # 主要代码部分
 
 跟着MVC结构做的，看<a href='lib'>lib</a>里面
+
+<br>
+
+# [❎] 免责声明
+# [✔️] 自豪
+
+你将面对的是：一个大四以前只知道MATLAB，后面做了点python，arduino，研一才读了点c++，java的数学甜菜。别抱怨难用，能用就好了。
+
+
+
