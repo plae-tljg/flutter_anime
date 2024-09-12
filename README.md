@@ -9,11 +9,12 @@ Flutter project to display anime update list, videos and so on as long as I thin
 1. view most recent anime list (based on a site)
 2. view anime there
 3. info page to handle error logging on frontend
-4. anime downloading (working, 80%)
-5. changing source (working, 0%)
-6. chatbot (working, 0%)
-7. minigame (working, 0%)
-8. any feature to add
+4. anime downloading
+5. downloaded anime viewing
+6. changing source (working, 0%)
+7. chatbot (working, 0%)
+8. minigame (working, 0%)
+9. any feature to add
 
 
 # working idea
