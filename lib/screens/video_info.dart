@@ -20,10 +20,10 @@ class _VideoGalleryScreenState extends State<VideoGalleryScreen> {
   }
 
   Future<void> _loadVideos() async {
-    final downloadsDirectory = await getApplicationDocumentsDirectory();
-    final videos = await downloadsDirectory.list().toList();
+    final downloadsDirectory = await getExternalStorageDirectory();
+    final videos = await downloadsDirectory?.list().toList();
     setState(() {
-      _videos = videos.where((entity) => entity.path.endsWith('.mp4')).toList();
+      _videos = videos!.where((entity) => entity.path.endsWith('.mp4')).toList();
       _isLoading = false;
     });
   }
