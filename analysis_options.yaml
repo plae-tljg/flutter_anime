@@ -26,3 +26,8 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+# 忽略backup文件夹中的代码问题
+analyzer:
+  exclude:
+    - "backup/**"

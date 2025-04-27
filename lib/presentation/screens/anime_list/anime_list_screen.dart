@@ -31,9 +31,7 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('动漫列表'),
-      ),
+      appBar: AppBar(title: const Text('动漫列表')),
       body: ChangeNotifierProvider.value(
         value: _provider,
         child: Consumer<AnimeProvider>(
@@ -43,16 +41,11 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
             }
 
             if (provider.error != null) {
-              return ErrorView(
-                error: provider.error!,
-                onRetry: _loadData,
-              );
+              return ErrorView(error: provider.error!, onRetry: _loadData);
             }
 
             if (provider.animes.isEmpty) {
-              return const Center(
-                child: Text('暂无动漫'),
-              );
+              return const Center(child: Text('暂无动漫'));
             }
 
             return RefreshIndicator(
@@ -63,21 +56,12 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
                   final anime = provider.animes[index];
                   return AnimeListItem(
                     anime: anime,
-                    onTap: () async {
-                      try {
-                        final videoUrl = await provider.getVideoUrl(anime.url);
-                        if (!mounted) return;
-                        NavigationHelper.navigateToVideoPlayer(
-                          context,
-                          videoUrl,
-                          anime.title,
-                        );
-                      } catch (e) {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('获取视频失败: $e')),
-                        );
-                      }
+                    onTap: () {
+                      NavigationHelper.navigateToVideoPlayer(
+                        context,
+                        anime.url,
+                        anime.title,
+                      );
                     },
                   );
                 },

@@ -1,0 +1,31 @@
+lib/
+  ├── core/
+  │   ├── config/
+  │   │   └── app_config.dart
+  │   ├── di/
+  │   │   └── service_locator.dart
+  │   └── error/
+  │       └── error_handler.dart
+  ├── data/
+  │   ├── models/
+  │   │   └── anime_model.dart
+  │   ├── repositories/
+  │   │   └── anime_repository_impl.dart
+  │   └── services/
+  │       └── anime_service.dart
+  ├── domain/
+  │   ├── entities/
+  │   │   └── anime.dart
+  │   └── repositories/
+  │       └── anime_repository.dart
+  ├── presentation/
+  │   ├── screens/
+  │   │   ├── home/
+  │   │   ├── anime_list/
+  │   │   └── video_player/
+  │   ├── widgets/
+  │   │   └── common/
+  │   └── providers/
+  │       └── anime_provider.dart
+  └── utils/
+      └── navigation_helper.dart

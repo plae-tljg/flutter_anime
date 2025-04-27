@@ -11,14 +11,15 @@ class NavigationHelper {
   }
 
   static void navigateToVideoPlayer(
-      BuildContext context, String videoUrl, String title) {
+    BuildContext context,
+    String animeUrl,
+    String title,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VideoPlayerScreen(
-          videoUrl: videoUrl,
-          title: title,
-        ),
+        builder:
+            (context) => VideoPlayerScreen(animeUrl: animeUrl, title: title),
       ),
     );
   }

@@ -1,14 +1,18 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/anime.dart';
 import '../../domain/repositories/anime_repository.dart';
+import 'package:flutter/material.dart';
+import '../../data/services/anime_service.dart';
+import '../../core/di/service_locator.dart';
 
 class AnimeProvider extends ChangeNotifier {
   final AnimeRepository _repository;
+  final AnimeService _animeService;
   List<Anime> _animes = [];
   bool _isLoading = false;
   String? _error;
 
-  AnimeProvider(this._repository);
+  AnimeProvider(this._repository) : _animeService = getIt<AnimeService>();
 
   List<Anime> get animes => _animes;
   bool get isLoading => _isLoading;
@@ -39,9 +43,18 @@ class AnimeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> downloadVideo(String videoUrl, String fileName) async {
+  Future<void> downloadVideo(
+    String videoUrl,
+    String fileName,
+    BuildContext context, {
+    Function(double)? onProgress,
+  }) async {
     try {
-      await _repository.downloadVideo(videoUrl, fileName);
+      await _animeService.downloadVideo(
+        videoUrl,
+        fileName,
+        onProgress: onProgress,
+      );
     } catch (e) {
       _error = e.toString();
       notifyListeners();

@@ -1,0 +1,10 @@
+{'name': '失憶投捕 [10]', 'url': 'https://anime1.me/23273'}
+{'name': 'RINKAI！女子競輪 [11]', 'url': 'https://anime1.me/23272'}
+{'name': '秘密的美妙公主 [11]', 'url': 'https://anime1.me/23271'}
+{'name': '我回來了、歡迎回家 [11]', 'url': 'https://anime1.me/23270'}
+{'name': '轉生為第七王子，隨心所欲的魔法學習之路 [12]', 'url': 'https://anime1.me/23269'}
+{'name': 'Re：Monster [12]', 'url': 'https://anime1.me/23268'}
+{'name': '神明渴求著遊戲。 [12]', 'url': 'https://anime1.me/23267'}
+{'name': '月光下的異世界之旅 第二幕 (第二季) [24]', 'url': 'https://anime1.me/23266'}
+{'name': '從Lv2開始開外掛的前勇者候補過著悠哉異世界生活 [11]', 'url': 'https://anime1.me/23265'}
+{'name': '殺手寓言 [11]', 'url': 'https://anime1.me/23264'}
