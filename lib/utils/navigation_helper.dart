@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
-import '../screens/anime_webview_screen.dart';
+import '../presentation/screens/anime_list/anime_list_screen.dart';
+import '../presentation/screens/video_player/video_player_screen.dart';
 
-void launchAnimePage(BuildContext context, String animeUrl) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => AnimeWebViewScreen(animeUrl: animeUrl),
-    ),
-  );
+class NavigationHelper {
+  static void navigateToAnimeList(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AnimeListScreen()),
+    );
+  }
+
+  static void navigateToVideoPlayer(
+      BuildContext context, String videoUrl, String title) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VideoPlayerScreen(
+          videoUrl: videoUrl,
+          title: title,
+        ),
+      ),
+    );
+  }
 }
