@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/di/service_locator.dart';
+import 'core/services/log_service.dart';
 import 'presentation/screens/home/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化日志服务
+  final logger = LogService();
+  logger.info('应用启动');
+
   setupDependencies();
   runApp(const MyApp());
 }

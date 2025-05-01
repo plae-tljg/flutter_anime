@@ -5,41 +5,29 @@ class WebContentService {
   static const String _videoSelector = 'video.vjs-tech';
   static const String _videoContainerSelector = '.vjscontainer';
 
+  static Future<void> clickVideoPoster(WebViewController controller) async {
+    await controller.runJavaScript('''
+      (function() {
+        const poster = document.querySelector('.vjs-poster');
+        if (poster) {
+          poster.click();
+        }
+      })();
+    ''');
+  }
+
   static Future<String> extractVideoUrl(WebViewController controller) async {
     try {
-      // 设置调试通道
-      WebViewDebugService.setupDebugChannels(controller);
-      await WebViewDebugService.injectDebugScripts(controller);
-
-      // 检查视频元素
-      await WebViewDebugService.inspectVideoElement(controller);
-
-      // 等待视频元素加载
-      await Future.delayed(const Duration(seconds: 2));
-
+      final cssSelector = await extractCssSelector(controller);
       final result = await controller.runJavaScriptReturningResult('''
         (function() {
-          console.log('开始提取视频URL...');
-          
-          const videoElement = document.querySelector('$_videoSelector');
-          if (videoElement) {
-            const src = videoElement.src || videoElement.currentSrc || '';
-            console.log('视频URL:', src);
-            return src.startsWith('//') ? 'https:' + src : src;
+          let srcElement = document.querySelector('${cssSelector}_html5_api');
+          let srcUrl = '';
+          if (srcElement) {
+            srcUrl = srcElement.src;
+            console.log('找到视频URL:', srcUrl);
           }
-          
-          const container = document.querySelector('$_videoContainerSelector');
-          if (container) {
-            const video = container.querySelector('video');
-            if (video) {
-              const src = video.src || video.currentSrc || '';
-              console.log('容器中视频URL:', src);
-              return src.startsWith('//') ? 'https:' + src : src;
-            }
-          }
-          
-          console.error('未找到视频元素');
-          return '';
+          return srcUrl;
         })();
       ''');
 
@@ -54,78 +42,180 @@ class WebContentService {
     }
   }
 
+  static Future<String> getVideoUrlAfterClick(
+      WebViewController controller) async {
+    try {
+      // 先点击视频海报
+      await clickVideoPoster(controller);
+
+      // 等待视频URL加载
+      await Future.delayed(const Duration(seconds: 1));
+
+      // 获取视频URL
+      return await extractVideoUrl(controller);
+    } catch (e) {
+      print('获取视频URL失败: $e');
+      throw Exception('获取视频URL失败: $e');
+    }
+  }
+
+  static Future<void> disableVideoAutoplay(WebViewController controller) async {
+    await controller.runJavaScript('''
+      (function() {
+        const video = document.querySelector('video');
+        if (video) {
+          video.autoplay = false;
+          video.pause();
+        }
+      })();
+    ''');
+  }
+
   static Future<void> isolateVideoElement(WebViewController controller) async {
     await controller.runJavaScript('''
       (function() {
-        console.log('开始隔离视频元素...');
-        
-        // 等待视频元素加载
-        const waitForElement = (selector, timeout = 5000) => {
-          return new Promise((resolve, reject) => {
-            const startTime = Date.now();
-            const checkElement = () => {
-              const element = document.querySelector(selector);
-              if (element) {
-                console.log('找到元素:', selector);
-                resolve(element);
-              } else if (Date.now() - startTime >= timeout) {
-                console.error('未找到元素:', selector);
-                reject(new Error('Element not found'));
-              } else {
-                setTimeout(checkElement, 100);
+        // 选择要保留的元素
+        const targetElement = document.querySelector('$_videoContainerSelector');
+
+        if (targetElement) {
+          // 移除所有其他元素
+          const allElements = document.body.children;
+          for (let i = allElements.length - 1; i >= 0; i--) {
+            const element = allElements[i];
+            if (element !== targetElement) {
+              element.remove();
+            }
+          }
+          
+          // 将目标元素直接移动到body
+          document.body.appendChild(targetElement);
+          
+          // 设置基本样式
+          document.body.style.margin = '0';
+          document.body.style.padding = '0';
+          document.body.style.backgroundColor = '#000';
+          document.body.style.display = 'block';
+          
+          // 设置视频容器样式
+          targetElement.style.width = '100%';
+          targetElement.style.height = '100vh';
+          
+          // 设置视频元素样式
+          const video = targetElement.querySelector('video');
+          if (video) {
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.controls = true;
+            video.playsInline = true;
+            video.autoplay = false;
+          }
+        } else {
+          console.log("未找到视频容器元素");
+        }
+      })();
+    ''');
+  }
+
+  static Future<String> extractCssSelector(WebViewController controller) async {
+    final result = await controller.runJavaScriptReturningResult('''
+      (function() {
+        function getCssSelector(element) {
+          if (!element) return 'Element not found';
+          var path = [];
+          while (element.nodeType === Node.ELEMENT_NODE) {
+            var selector = '';
+            if (element.id) {
+              selector += '#' + element.id;
+              path.unshift(selector);
+              break;
+            } else {
+              var sib = element, nth = 1;
+              while (sib = sib.previousElementSibling) {
+                if (sib.nodeName.toLowerCase() == selector)
+                  nth++;
               }
-            };
-            checkElement();
+              if (nth != 1)
+                selector += ":nth-of-type(" + nth + ")";
+            }
+            path.unshift(selector);
+            element = element.parentNode;
+          }
+          return path.join(" > ");
+        }
+
+        var parentElement = document.querySelector('$_videoContainerSelector');
+        var childElement = parentElement ? parentElement.children[0] : null;
+
+        return getCssSelector(childElement);
+      })();
+    ''');
+
+    return result.toString().replaceAll('"', '');
+  }
+
+  static Future<void> captureVideoStream(WebViewController controller) async {
+    await controller.runJavaScript('''
+      (function() {
+        const video = document.querySelector('video');
+        if (video) {
+          const mediaSource = new MediaSource();
+          video.src = URL.createObjectURL(mediaSource);
+          
+          mediaSource.addEventListener('sourceopen', () => {
+            const sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+            
+            video.addEventListener('loadeddata', () => {
+              const videoData = video.captureStream();
+              FlutterChannel.postMessage(JSON.stringify({
+                type: 'videoData',
+                data: videoData
+              }));
+            });
           });
+        }
+      })();
+    ''');
+  }
+
+  static Future<void> interceptNetworkRequests(
+    WebViewController controller,
+  ) async {
+    await controller.runJavaScript('''
+      (function() {
+        const originalFetch = window.fetch;
+        window.fetch = async function(url, options) {
+          const response = await originalFetch(url, options);
+          
+          if (url.includes('.mp4') || response.headers.get('content-type')?.includes('video')) {
+            FlutterChannel.postMessage(JSON.stringify({
+              type: 'videoUrl',
+              url: url
+            }));
+          }
+          
+          return response;
         };
+      })();
+    ''');
+  }
 
-        // 主函数
-        (async () => {
-          try {
-            console.log('等待视频容器加载...');
-            const container = await waitForElement('$_videoContainerSelector');
-            console.log('视频容器:', container);
-            
-            console.log('等待视频元素加载...');
-            const videoElement = await waitForElement('$_videoSelector');
-            console.log('视频元素:', videoElement);
-
-            // 保存视频元素和其父容器
-            const videoHtml = container.outerHTML;
-            console.log('视频HTML:', videoHtml);
-            
-            // 清空页面
-            document.body.innerHTML = '';
-            
-            // 添加视频容器
-            document.body.innerHTML = videoHtml;
-            
-            // 设置样式
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
-            document.body.style.backgroundColor = '#000';
-            
-            // 重新获取视频元素并设置属性
-            const newVideo = document.querySelector('$_videoSelector');
-            console.log('新视频元素:', newVideo);
-            
-            if (newVideo) {
-              newVideo.style.width = '100%';
-              newVideo.style.height = '100%';
-              newVideo.controls = true;
-              newVideo.autoplay = true;
-              newVideo.playsInline = true;
-              
-              // 确保视频可以播放
-              newVideo.addEventListener('canplay', () => {
-                console.log('视频可以播放');
-                newVideo.play().catch(e => console.error('播放失败:', e));
+  static Future<void> accessBrowserCache(WebViewController controller) async {
+    await controller.runJavaScript('''
+      (function() {
+        const video = document.querySelector('video');
+        if (video) {
+          const cache = window.caches;
+          cache.match(video.src).then(response => {
+            if (response) {
+              response.blob().then(blob => {
+                FlutterChannel.postMessage(JSON.stringify({
+                  type: 'cachedVideo',
+                  data: blob
+                }));
               });
             }
-          } catch (e) {
-            console.error('错误:', e);
-          }
-        })();
+          });
+        }
       })();
     ''');
   }
