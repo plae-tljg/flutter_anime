@@ -48,6 +48,7 @@ dependencies:
   dio_cookie_manager: ^3.1.1
   cookie_jar: ^4.0.8
   webview_cookie_manager_plus: ^2.0.15
+  device_info_plus: ^9.1.1
 
 dev_dependencies:
   flutter_test:

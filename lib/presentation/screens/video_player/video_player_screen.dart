@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
+import '../../../core/services/storage_service.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
@@ -27,7 +28,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late WebViewController _controller;
   bool _isLoading = true;
-  bool _isVideoOnlyMode = false;
+  bool _isVideoOnlyMode = true;
   bool _isDownloading = false;
   bool _isFirstLoad = true;
   bool _isLoadingFinalUrl = false;
@@ -62,7 +63,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       _isLoading = true;
       _isFirstLoad = true;
       _isLoadingFinalUrl = false;
-      _isVideoOnlyMode = false;
+      _isVideoOnlyMode = true;
     });
 
     // 清除之前的 WebView 状态
@@ -76,7 +77,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   Future<void> _loadDefaultMode() async {
     final prefs = await SharedPreferences.getInstance();
-    final defaultMode = prefs.getBool('default_video_only_mode') ?? false;
+    final defaultMode = prefs.getBool('default_video_only_mode') ?? true;
     if (defaultMode) {
       setState(() {
         _isVideoOnlyMode = true;
@@ -180,24 +181,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ..loadRequest(Uri.parse(widget.videoUrl));
   }
 
-  Future<Directory> _getDownloadDirectory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final usePublicDirectory =
-        prefs.getBool('use_public_download_directory') ?? true;
-
-    if (usePublicDirectory) {
-      return Directory('/storage/emulated/0/Download');
-    } else {
-      final appDir = await getExternalStorageDirectory();
-      if (appDir == null) {
-        throw Exception('无法访问存储目录');
-      }
-      return Directory('${appDir.path}/Downloads');
-    }
-  }
-
   Future<void> _downloadVideo() async {
-    // 如果正在下载，直接返回
     if (_isDownloading) {
       return;
     }
@@ -209,55 +193,73 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         _downloadProgress = 0.0;
       });
 
-      // 请求存储权限
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        throw Exception('需要存储权限才能下载视频');
+      // 获取下载目录设置
+      final prefs = await SharedPreferences.getInstance();
+      final usePublicDirectory =
+          prefs.getBool('use_public_download_directory') ?? false;
+
+      // 只有在使用公共下载目录时才请求存储权限
+      if (usePublicDirectory && Platform.isAndroid) {
+        debugPrint('使用公共下载目录，请求存储权限...');
+        if (!await Permission.storage.request().isGranted) {
+          throw Exception('需要存储权限才能下载到公共目录');
+        }
       }
-      debugPrint('存储权限已获取');
 
       // 获取下载目录
-      final directory = await _getDownloadDirectory();
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
-      }
-      debugPrint('下载目录: ${directory.path}');
+      final directory = await StorageService.getAppDownloadDirectory();
+      debugPrint('最终使用的下载目录: ${directory.path}');
 
       // 生成文件名
       final fileName =
           '${widget.title}_${DateTime.now().millisecondsSinceEpoch}.mp4';
       final filePath = '${directory.path}/$fileName';
+      debugPrint('完整文件路径: $filePath');
 
       // 检查文件是否已存在
       final file = File(filePath);
       if (await file.exists()) {
+        debugPrint('文件已存在: $filePath');
         throw Exception('文件已存在，请勿重复下载');
       }
 
       // 检查是否正在下载同一个动漫
       if (_currentDownloadPath != null &&
           _currentDownloadPath!.contains(widget.title)) {
+        debugPrint('正在下载相同的动漫: ${widget.title}');
         throw Exception('正在下载该动漫，请等待完成');
       }
 
-      _currentDownloadPath = filePath; // 记录当前下载路径
-      debugPrint('目标文件路径: $filePath');
+      _currentDownloadPath = filePath;
+      debugPrint('开始下载到路径: $filePath');
 
       // 获取当前页面URL
       String videoUrl = await _controller.currentUrl() ?? widget.videoUrl;
+      debugPrint('视频URL: $videoUrl');
 
       // 如果当前URL不是直接的视频URL，尝试获取视频URL
       if (!videoUrl.endsWith('.mp4')) {
+        debugPrint('尝试获取直接视频URL...');
         videoUrl = await WebContentService.getVideoUrlAfterClick(_controller);
         if (videoUrl.isEmpty) {
+          debugPrint('无法获取视频URL');
           throw Exception('无法获取视频URL');
         }
+        debugPrint('获取到视频URL: $videoUrl');
       }
 
-      debugPrint('视频URL: $videoUrl');
-
       // 使用 CookieService 下载文件
+      debugPrint('开始下载文件...');
       await CookieService.downloadFile(videoUrl, filePath);
+      debugPrint('文件下载完成: $filePath');
+
+      // 验证文件是否真的下载成功
+      if (await file.exists()) {
+        final fileSize = await file.length();
+        debugPrint('文件下载成功，大小: ${fileSize} 字节');
+      } else {
+        debugPrint('警告：文件似乎没有成功下载');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -276,7 +278,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _currentDownloadPath = null; // 清除当前下载路径
+          _currentDownloadPath = null;
         });
       }
     }

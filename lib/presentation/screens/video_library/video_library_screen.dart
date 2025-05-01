@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../../../core/services/permission_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../video_player/local_video_player_screen.dart';
+import 'dart:io' show Platform;
 
 class VideoLibraryScreen extends StatefulWidget {
   const VideoLibraryScreen({Key? key}) : super(key: key);
@@ -30,30 +32,23 @@ class _VideoLibraryScreenState extends State<VideoLibraryScreen> {
         _error = null;
       });
 
-      // 请求存储权限
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
+      // 请求权限
+      final hasPermission =
+          await PermissionService.requestStoragePermission(context);
+      if (!hasPermission) {
         throw Exception('需要存储权限才能访问视频');
       }
+
+      // 确保应用目录存在
+      await StorageService.ensureAppDirectories();
 
       // 获取下载目录
       final prefs = await SharedPreferences.getInstance();
       final usePublicDirectory =
-          prefs.getBool('use_public_download_directory') ?? true;
+          prefs.getBool('use_public_download_directory') ?? false;
 
-      // 获取所有可能的下载目录
-      final List<Directory> directories = [];
-
-      // 添加公共下载目录
-      if (usePublicDirectory) {
-        directories.add(Directory('/storage/emulated/0/Download'));
-      }
-
-      // 添加应用私有目录
-      final appDir = await getExternalStorageDirectory();
-      if (appDir != null) {
-        directories.add(Directory('${appDir.path}/Downloads'));
-      }
+      // 获取所有视频目录
+      final directories = await StorageService.getVideoDirectories();
 
       debugPrint('正在搜索以下目录:');
       for (var dir in directories) {
