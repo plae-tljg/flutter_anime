@@ -1,0 +1,17 @@
+{
+  "name": "agedm.com",
+  "baseUrl": "https://www.agedm.com",
+  "animeListExtractor": {
+    "type": "css",
+    "selector": "a[href]",
+    "attr": "href",
+    "textField": "text",
+    "filterPatterns": ["/video/", "/anime/"]
+  },
+  "videoExtractor": {
+    "strategy": "direct",
+    "videoSelector": "video.art-video",
+    "isolateVideo": false,
+    "containerSelector": null
+  }
+}

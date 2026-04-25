@@ -1,59 +1,68 @@
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import '../../core/config/app_config.dart';
 import '../../domain/entities/anime.dart';
-import '../models/anime_model.dart';
-import 'web_content_service.dart';
+import '../../domain/sources/anime_source.dart';
+import '../../domain/sources/anime1_me_source.dart';
+import '../../domain/sources/agedm_source.dart';
+import '../../domain/sources/generic_config_source.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:dio/dio.dart';
 import '../../core/services/log_service.dart';
 
 class AnimeService {
-  final _logger = LogService();
+  final LogService _logger = LogService();
+  AnimeSource _currentSource = Anime1MeSource();
+
+  AnimeSource get currentSource => _currentSource;
+
+  void setSource(AnimeSource source) {
+    _currentSource = source;
+    _logger.info('Switched to source: ${source.name}');
+  }
+
+  List<String> get availableSources => ['anime1.me', 'agedm.com', 'config:anime1_me.json', 'config:agedm.json'];
+
+  void setSourceByName(String name) {
+    switch (name) {
+      case 'anime1.me':
+        _currentSource = Anime1MeSource();
+        break;
+      case 'agedm.com':
+        _currentSource = AgedmSource();
+        break;
+      case 'config:anime1_me.json':
+        _currentSource = GenericConfigSource('lib/domain/sources/configs/anime1_me.json');
+        break;
+      case 'config:agedm.json':
+        _currentSource = GenericConfigSource('lib/domain/sources/configs/agedm.json');
+        break;
+      default:
+        throw Exception('Unknown source: $name');
+    }
+  }
 
   Future<List<Anime>> fetchAnimeList() async {
     try {
-      _logger.info('开始获取动漫列表');
-      final response = await http.get(Uri.parse(AppConfig.baseUrl));
-
-      if (response.statusCode == 200) {
-        final document = parse(response.body);
-        final animeElements = document.querySelectorAll('ul li a');
-        _logger.debug('成功获取到 ${animeElements.length} 个动漫条目');
-
-        return animeElements.map((element) {
-          return AnimeModel(
-            id: element.attributes['href'] ?? '',
-            title: element.text.trim(),
-            url: element.attributes['href'] ?? '',
-          );
-        }).toList();
-      } else {
-        _logger.error('加载动漫列表失败: ${response.statusCode}');
-        throw Exception('加载动漫列表失败');
-      }
+      _logger.info('Fetching anime list from ${_currentSource.name}');
+      return await _currentSource.getAnimeList();
     } catch (e, stackTrace) {
-      _logger.error('获取动漫列表时发生错误', e, stackTrace);
+      _logger.error('Error fetching anime list', e, stackTrace);
       rethrow;
     }
   }
 
   Future<String> extractVideoUrl(String animeUrl) async {
-    _logger.info('开始提取视频URL: $animeUrl');
+    _logger.info('Extracting video URL from: $animeUrl');
     final controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(Uri.parse(animeUrl));
 
-    // 等待页面加载完成
     await Future.delayed(const Duration(seconds: 3));
-    _logger.debug('WebView页面加载完成，开始提取视频URL');
 
-    // 提取视频URL
-    final videoUrl = await WebContentService.extractVideoUrl(controller);
-    _logger.info('成功提取视频URL');
+    final videoUrl = await _currentSource.extractVideoUrl(controller, animeUrl);
+
+    _logger.info('Successfully extracted video URL');
     return videoUrl;
   }
 
@@ -63,9 +72,8 @@ class AnimeService {
     Function(double)? onProgress,
   }) async {
     try {
-      _logger.info('开始下载视频: $fileName');
+      _logger.info('Starting download: $fileName');
 
-      // 请求所有必要的权限
       final permissions = [
         Permission.storage,
         Permission.manageExternalStorage,
@@ -75,16 +83,15 @@ class AnimeService {
       for (var permission in permissions) {
         final status = await permission.status;
         if (status.isDenied) {
-          _logger.warning('请求权限: ${permission.toString()}');
+          _logger.warning('Requesting permission: ${permission.toString()}');
           final result = await permission.request();
           if (!result.isGranted) {
-            _logger.error('权限被拒绝: ${permission.toString()}');
-            throw Exception('需要${permission.toString()}权限才能下载视频');
+            _logger.error('Permission denied: ${permission.toString()}');
+            throw Exception('Permission required: ${permission.toString()}');
           }
         }
       }
 
-      // 获取下载目录
       Directory? downloadsDir;
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
@@ -93,24 +100,22 @@ class AnimeService {
       }
 
       if (downloadsDir == null) {
-        throw Exception('无法获取下载目录');
+        throw Exception('Could not determine downloads directory');
       }
 
       if (!await downloadsDir.exists()) {
-        _logger.debug('创建下载目录');
+        _logger.debug('Creating downloads directory');
         await downloadsDir.create(recursive: true);
       }
 
       final file = File('${downloadsDir.path}/$fileName');
 
-      // 检查文件是否已存在
       if (await file.exists()) {
-        _logger.warning('文件已存在: ${file.path}');
-        throw Exception('文件已存在: ${file.path}');
+        _logger.warning('File already exists: ${file.path}');
+        throw Exception('File already exists: ${file.path}');
       }
 
-      // 下载文件
-      _logger.debug('开始下载文件到: ${file.path}');
+      _logger.debug('Downloading to: ${file.path}');
       await Dio().download(
         videoUrl,
         file.path,
@@ -121,9 +126,9 @@ class AnimeService {
         },
       );
 
-      _logger.info('文件下载完成: ${file.path}');
+      _logger.info('Download complete: ${file.path}');
     } catch (e, stackTrace) {
-      _logger.error('下载视频时发生错误', e, stackTrace);
+      _logger.error('Download error', e, stackTrace);
       rethrow;
     }
   }

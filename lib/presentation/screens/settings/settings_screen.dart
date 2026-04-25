@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/services/log_service.dart';
+import '../../providers/anime_provider.dart';
 import '../debug/debug_screen.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _defaultVideoOnlyMode = true;
   bool _usePublicDownloadDirectory = false;
 
@@ -43,22 +44,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _loadSettings();
   }
 
+  void _showSourceSelector() {
+    final sourceOptions = ref.read(availableSourcesProvider);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Select Anime Source',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ...sourceOptions.map((option) => ListTile(
+                leading: Icon(
+                  option.type == SourceType.config
+                      ? Icons.settings_applications
+                      : Icons.public,
+                ),
+                title: Text(option.name),
+                subtitle: Text(
+                  option.type == SourceType.config
+                      ? 'Config-based (editable JSON)'
+                      : 'Dart implementation',
+                ),
+                onTap: () {
+                  ref.read(animeNotifierProvider.notifier).switchSourceByName(option.id);
+                  Navigator.pop(context);
+                },
+              )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentSource = ref.watch(currentSourceProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.orange.withOpacity(0.1),
+            color: Colors.orange.withValues(alpha: 0.1),
             child: const Row(
               children: [
                 Icon(Icons.warning_amber_rounded, color: Colors.orange),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '以下功能为实验性功能，可能不稳定或无法正常工作',
+                    'Experimental features may be unstable',
                     style: TextStyle(color: Colors.orange),
                   ),
                 ),
@@ -66,9 +110,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.source),
+            title: const Text('Anime Source'),
+            subtitle: Text('Current: ${currentSource.name}'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: _showSourceSelector,
+          ),
+          const Divider(),
           SwitchListTile(
-            title: const Text('默认视频模式'),
-            subtitle: const Text('打开后，视频播放页面将默认只显示视频元素（实验性功能）'),
+            title: const Text('Default Video Mode'),
+            subtitle: const Text('Auto-show video-only mode on playback'),
             value: _defaultVideoOnlyMode,
             onChanged: (bool value) {
               setState(() {
@@ -79,8 +131,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           SwitchListTile(
-            title: const Text('使用公共下载目录'),
-            subtitle: const Text('打开后，视频将下载到设备的"下载"文件夹中，关闭则下载到应用私有目录（实验性功能）'),
+            title: const Text('Use Public Downloads'),
+            subtitle: const Text('Save to device Downloads folder'),
             value: _usePublicDownloadDirectory,
             onChanged: (bool value) {
               setState(() {
@@ -92,25 +144,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.restore),
-            title: const Text('重置为默认设置'),
-            subtitle: const Text('将所有设置恢复为默认值'),
+            title: const Text('Reset to Defaults'),
             onTap: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('确认重置'),
-                  content: const Text('确定要将所有设置恢复为默认值吗？'),
+                  title: const Text('Confirm Reset'),
+                  content: const Text('Reset all settings to defaults?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: const Text('Cancel'),
                     ),
                     TextButton(
                       onPressed: () {
                         _resetToDefaults();
                         Navigator.pop(context);
                       },
-                      child: const Text('确定'),
+                      child: const Text('Confirm'),
                     ),
                   ],
                 ),
@@ -118,9 +169,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            title: const Text('调试信息'),
-            subtitle: const Text('查看应用日志和调试信息'),
-            trailing: const Icon(Icons.bug_report),
+            leading: const Icon(Icons.bug_report),
+            title: const Text('Debug Info'),
+            subtitle: const Text('View app logs and debug information'),
             onTap: () {
               Navigator.push(
                 context,
