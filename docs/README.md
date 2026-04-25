@@ -31,16 +31,22 @@ lib/
     └── services/         # Shared services
 ```
 
-## Quick Start
-
-### Installation
+## Installation
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-### Adding a New Anime Source
+## Building & Release
+
+See [BUILD.md](BUILD.md) for detailed build instructions including:
+- Debug and release APK builds
+- App bundle for Play Store
+- Keystore signing configuration
+- CI/CD setup
+
+## Adding a New Anime Source
 
 1. Create a new class implementing `AnimeSource` in `lib/domain/sources/`
 2. Define `videoSelector` (CSS selector for `<video>` element)
